@@ -40,7 +40,7 @@ export default function AdminMentors() {
     if (!form.email) { toast.error('Email required'); return; }
     setSaving(true);
     try {
-      await promoteToMentor(form.email, form.specialization, form.phone);
+      await promoteToMentor(form.email, form.name, form.specialization, form.phone);
       toast.success('Mentor added/promoted successfully!');
       setShowModal(false);
       setForm({ name: '', email: '', phone: '', specialization: '' });

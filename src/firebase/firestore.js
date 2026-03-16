@@ -20,21 +20,23 @@ export const createMentor = (uid, data) =>
     ...data, role: 'mentor', createdAt: serverTimestamp()
   });
 
-export const promoteToMentor = async (email, specialization, phone) => {
+export const promoteToMentor = async (email, name, specialization, phone) => {
   const q = query(collection(db, 'users'), where('email', '==', email), limit(1));
   const snap = await getDocs(q);
   
   if (!snap.empty) {
     const userDoc = snap.docs[0];
-    await updateDoc(doc(db, 'users', userDoc.id), {
+    const updateData = {
       role: 'mentor',
       specialization: specialization || 'General',
       phone: phone || userDoc.data().phone || ''
-    });
-    return { id: userDoc.id, ...userDoc.data(), role: 'mentor' };
+    };
+    if (name) updateData.name = name;
+    await updateDoc(doc(db, 'users', userDoc.id), updateData);
+    return { id: userDoc.id, ...userDoc.data(), ...updateData, role: 'mentor' };
   } else {
     const uid = `mentor_${Date.now()}`;
-    const data = { email, name: email.split('@')[0], role: 'mentor', specialization, phone };
+    const data = { email, name: name || email.split('@')[0], role: 'mentor', specialization, phone };
     await setDoc(doc(db, 'users', uid), { ...data, createdAt: serverTimestamp() });
     return { id: uid, ...data };
   }

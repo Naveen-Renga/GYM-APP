@@ -246,7 +246,7 @@ export default function AdminMembers() {
                           onClick={async () => {
                             if (!confirm(`Promote ${m.name} to Mentor?`)) return;
                             try {
-                              await promoteToMentor(m.email);
+                              await promoteToMentor(m.email, m.name);
                               toast.success(`${m.name} promoted to Mentor!`);
                               loadData();
                             } catch (e) { toast.error(e.message); }
