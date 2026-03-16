@@ -46,24 +46,26 @@ export default function MemberProgress() {
     loadStatic();
 
     // Real-time attendance listener
+    // Simplified query to only filter by memberId to avoid any index requirement
     const q = query(
       collection(db, 'attendance'),
-      where('memberId', '==', user.uid),
-      where('status', '==', 'present')
-      // Removed orderBy to avoid missing composite index error
+      where('memberId', '==', user.uid)
     );
 
     const unsubscribe = onSnapshot(q, (snap) => {
-      let records = snap.docs.map(d => d.data());
+      // FIX 1 & 2: Load and Filter in-memory
+      const allRecords = snap.docs.map(d => d.data());
+      const presentRecords = allRecords.filter(r => r.status === 'present');
       
+      // FIX 3: Grouping for Chart (after optional sorting)
       // Sort in-memory: Latest first
-      records.sort((a, b) => {
+      presentRecords.sort((a, b) => {
         const dateA = a.date?.toDate ? a.date.toDate() : new Date(a.date || 0);
         const dateB = b.date?.toDate ? b.date.toDate() : new Date(b.date || 0);
         return dateB - dateA;
       });
 
-      setTotalSessions(records.length);
+      setTotalSessions(presentRecords.length);
 
       // Group by month
       const monthlyData = {};
@@ -74,9 +76,8 @@ export default function MemberProgress() {
         monthlyData[key] = { month: key, sessions: 0 };
       }
 
-      records.forEach(r => {
+      presentRecords.forEach(r => {
         if (!r.date) return;
-        // Handle both string dates and Firestore Timestamps
         const dt = typeof r.date === 'string' ? new Date(r.date) : r.date.toDate();
         const key = dt.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
         if (monthlyData[key]) {
@@ -87,8 +88,9 @@ export default function MemberProgress() {
       setChartData(Object.values(monthlyData));
       setLoading(false);
     }, (err) => {
+      // Suppress specific error toast as requested
       console.error("Attendance listener error:", err);
-      toast.error("Failed to sync attendance data");
+      // setTotalSessions(0); // Optional: ensure it stays 0 on error
       setLoading(false);
     });
 
