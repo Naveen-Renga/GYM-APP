@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — IronForge</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div id="page-loader">
+    <div class="loader-logo">IRON<span>FORGE</span></div>
+    <div class="loader-bar"></div>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <div class="app-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">🛡️</div>
+        <div>
+          <div class="sidebar-brand">IRON<span>FORGE</span></div>
+          <div class="sidebar-subtitle">Admin Panel</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <div class="nav-section-label">MANAGEMENT</div>
+        <div class="nav-item active" id="nav-home" onclick="loadPage('home')"><span class="nav-icon">📊</span><span>Dashboard</span></div>
+        <div class="nav-item" id="nav-members" onclick="loadPage('members')"><span class="nav-icon">👥</span><span>Members</span></div>
+        <div class="nav-item" id="nav-mentors" onclick="loadPage('mentors')"><span class="nav-icon">🏅</span><span>Mentors</span></div>
+        <div class="nav-item" id="nav-plans" onclick="loadPage('plans')"><span class="nav-icon">📋</span><span>Plans</span></div>
+        <div class="nav-item" id="nav-bookings" onclick="loadPage('bookings')"><span class="nav-icon">📅</span><span>Bookings</span></div>
+        <div class="nav-item" id="nav-payments" onclick="loadPage('payments')"><span class="nav-icon">💳</span><span>Payments</span></div>
+        <div class="nav-section-label">ANALYTICS</div>
+        <div class="nav-item" id="nav-analytics" onclick="loadPage('analytics')"><span class="nav-icon">📈</span><span>Analytics</span></div>
+        <div class="nav-section-label">ACCOUNT</div>
+        <div class="nav-item" id="nav-profile" onclick="loadPage('profile')"><span class="nav-icon">👤</span><span>Profile</span></div>
+      </nav>
+
+      <div class="sidebar-user" id="sidebar-user">
+        <div class="sidebar-avatar" id="user-avatar-sidebar">A</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="user-name-sidebar">Loading...</div>
+          <div class="sidebar-user-role">ADMIN</div>
+        </div>
+        <span class="sidebar-logout" onclick="handleLogout()" title="Logout">⏻</span>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="topbar-menu-btn" onclick="toggleSidebar()">☰</button>
+          <div>
+            <div class="topbar-title" id="topbar-title">Dashboard</div>
+            <div class="topbar-breadcrumb" id="topbar-breadcrumb">IronForge › Dashboard</div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="topbar-notif" id="notif-btn" onclick="toggleNotif()">
+            🔔 <span class="notif-dot"></span>
+            <div class="notif-panel hidden" id="notif-panel">
+              <div style="padding:14px 16px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:13px;font-weight:700;">Notifications</div>
+              <div id="notif-list">
+                <div class="notif-item"><div class="notif-dot-i"></div><div class="notif-text"><strong>Welcome to IronForge Admin!</strong><span>Manage your gym efficiently.</span></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="content-area" id="main-content">
+        <div class="empty-state"><div class="empty-icon" style="animation:spin 1s linear infinite">⚙️</div><h3>Loading...</h3></div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Add Member Modal -->
+  <div class="modal-overlay" id="modal-add-member">
+    <div class="modal">
+      <div class="modal-header"><h3 class="modal-title">Add New Member</h3><button class="modal-close" onclick="closeModal('modal-add-member')">✕</button></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Full Name</label><input type="text" id="am-name" class="form-control" placeholder="Rahul Sharma"></div>
+        <div class="form-group"><label class="form-label">Phone</label><input type="tel" id="am-phone" class="form-control" placeholder="+91 9876543210"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Email</label><input type="email" id="am-email" class="form-control" placeholder="rahul@email.com"></div>
+      <div class="form-group"><label class="form-label">Password</label><input type="password" id="am-password" class="form-control" placeholder="Temporary password"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Assign Plan</label><select id="am-plan" class="form-control"><option value="">— Select Plan —</option></select></div>
+        <div class="form-group"><label class="form-label">Assign Mentor</label><select id="am-mentor" class="form-control"><option value="">— Select Mentor —</option></select></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-add-member')">Cancel</button>
+        <button class="btn btn-primary" onclick="addMember()"><span class="btn-text">Add Member</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Mentor Modal -->
+  <div class="modal-overlay" id="modal-add-mentor">
+    <div class="modal">
+      <div class="modal-header"><h3 class="modal-title">Add New Mentor</h3><button class="modal-close" onclick="closeModal('modal-add-mentor')">✕</button></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Full Name</label><input type="text" id="men-name" class="form-control" placeholder="Vikram Nair"></div>
+        <div class="form-group"><label class="form-label">Phone</label><input type="tel" id="men-phone" class="form-control" placeholder="+91 9876543210"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Email</label><input type="email" id="men-email" class="form-control" placeholder="vikram@ironforge.com"></div>
+      <div class="form-group"><label class="form-label">Password</label><input type="password" id="men-password" class="form-control" placeholder="Temporary password"></div>
+      <div class="form-group"><label class="form-label">Specialization</label><input type="text" id="men-spec" class="form-control" placeholder="e.g. Strength & Conditioning"></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-add-mentor')">Cancel</button>
+        <button class="btn btn-primary" onclick="addMentor()"><span class="btn-text">Add Mentor</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Plan Modal -->
+  <div class="modal-overlay" id="modal-add-plan">
+    <div class="modal">
+      <div class="modal-header"><h3 class="modal-title">Create Membership Plan</h3><button class="modal-close" onclick="closeModal('modal-add-plan')">✕</button></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Plan Name</label><input type="text" id="pl-name" class="form-control" placeholder="Pro Monthly"></div>
+        <div class="form-group"><label class="form-label">Price (₹)</label><input type="number" id="pl-price" class="form-control" placeholder="1999"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Duration (Days)</label><input type="number" id="pl-days" class="form-control" placeholder="30"></div>
+      <div class="form-group"><label class="form-label">Features (one per line)</label><textarea id="pl-features" class="form-control" rows="4" placeholder="Gym Access&#10;Locker Room"></textarea></div>
+      <div class="form-group"><label class="form-label">Mark as Popular?</label><select id="pl-popular" class="form-control"><option value="false">No</option><option value="true">Yes</option></select></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-add-plan')">Cancel</button>
+        <button class="btn btn-primary" onclick="savePlan()"><span class="btn-text">Create Plan</span></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

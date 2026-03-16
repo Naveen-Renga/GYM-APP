@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IronPeak — Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div id="page-loader">
+    <div class="loader-logo">IRON<span>PEAK</span></div>
+    <div class="loader-bar"></div>
+  </div>
+
+  <!-- SIDEBAR OVERLAY (mobile) -->
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <div class="app-layout">
+    <!-- ═══ SIDEBAR ═══ -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">🏋️</div>
+        <div>
+          <div class="sidebar-brand">IRON<span>PEAK</span></div>
+          <div class="sidebar-subtitle">Gym Management</div>
+        </div>
+      </div>
+
+      <!-- Dynamic nav rendered by JS based on role -->
+      <nav class="sidebar-nav" id="sidebar-nav"></nav>
+
+      <div class="sidebar-user" id="sidebar-user">
+        <div class="sidebar-avatar" id="user-avatar-sidebar">U</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="user-name-sidebar">Loading...</div>
+          <div class="sidebar-user-role" id="user-role-sidebar">—</div>
+        </div>
+        <span class="sidebar-logout" onclick="handleLogout()" title="Logout">⏻</span>
+      </div>
+    </aside>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <div class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="topbar-menu-btn" onclick="toggleSidebar()">☰</button>
+          <div>
+            <div class="topbar-title" id="topbar-title">Dashboard</div>
+            <div class="topbar-breadcrumb" id="topbar-breadcrumb">IronPeak</div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="topbar-search">
+            <span>🔍</span>
+            <input type="text" placeholder="Search..." id="global-search">
+          </div>
+          <div class="topbar-notif" id="notif-btn" onclick="toggleNotif()">
+            🔔 <span class="notif-dot"></span>
+            <div class="notif-panel hidden" id="notif-panel">
+              <div style="padding:14px 16px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:13px;font-weight:700;">Notifications</div>
+              <div id="notif-list">
+                <div class="notif-item"><div class="notif-dot-i"></div><div class="notif-text"><strong>Welcome to IronPeak!</strong><span>Your account is active.</span></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- All page sections rendered here -->
+      <main class="content-area" id="main-content">
+        <div class="empty-state"><div class="empty-icon">⏳</div><h3>Loading dashboard...</h3></div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ═══════ MODALS ═══════ -->
+
+  <!-- Add Member Modal -->
+  <div class="modal-overlay" id="modal-add-member">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Add New Member</h3>
+        <button class="modal-close" onclick="closeModal('modal-add-member')">✕</button>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Full Name</label><input type="text" id="am-name" class="form-control" placeholder="Rahul Sharma"></div>
+        <div class="form-group"><label class="form-label">Phone</label><input type="tel" id="am-phone" class="form-control" placeholder="+91 9876543210"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Email</label><input type="email" id="am-email" class="form-control" placeholder="rahul@email.com"></div>
+      <div class="form-group"><label class="form-label">Password</label><input type="password" id="am-password" class="form-control" placeholder="Temporary password"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Assign Plan</label>
+          <select id="am-plan" class="form-control"><option value="">— Select Plan —</option></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Assign Mentor</label>
+          <select id="am-mentor" class="form-control"><option value="">— Select Mentor —</option></select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-add-member')">Cancel</button>
+        <button class="btn btn-primary" style="width:auto" onclick="addMember()">
+          <span class="btn-text">Add Member</span><span class="btn-loader"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Mentor Modal -->
+  <div class="modal-overlay" id="modal-add-mentor">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Add New Mentor</h3>
+        <button class="modal-close" onclick="closeModal('modal-add-mentor')">✕</button>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Full Name</label><input type="text" id="men-name" class="form-control" placeholder="Vikram Nair"></div>
+        <div class="form-group"><label class="form-label">Phone</label><input type="tel" id="men-phone" class="form-control" placeholder="+91 9876543210"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Email</label><input type="email" id="men-email" class="form-control" placeholder="vikram@ironpeak.com"></div>
+      <div class="form-group"><label class="form-label">Password</label><input type="password" id="men-password" class="form-control" placeholder="Temporary password"></div>
+      <div class="form-group"><label class="form-label">Specialization</label><input type="text" id="men-spec" class="form-control" placeholder="e.g. Strength & Conditioning"></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-add-mentor')">Cancel</button>
+        <button class="btn btn-primary" style="width:auto" onclick="addMentor()">
+          <span class="btn-text">Add Mentor</span><span class="btn-loader"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Plan Modal -->
+  <div class="modal-overlay" id="modal-add-plan">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Create Membership Plan</h3>
+        <button class="modal-close" onclick="closeModal('modal-add-plan')">✕</button>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Plan Name</label><input type="text" id="pl-name" class="form-control" placeholder="Pro Monthly"></div>
+        <div class="form-group"><label class="form-label">Price (₹)</label><input type="number" id="pl-price" class="form-control" placeholder="1999"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Duration (Days)</label><input type="number" id="pl-days" class="form-control" placeholder="30"></div>
+      <div class="form-group"><label class="form-label">Features (one per line)</label><textarea id="pl-features" class="form-control" rows="4" placeholder="Gym Access&#10;Locker Room&#10;2 PT Sessions"></textarea></div>
+      <div class="form-group">
+        <label class="form-label">Mark as Popular?</label>
+        <select id="pl-popular" class="form-control"><option value="false">No</option><option value="true">Yes</option></select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-add-plan')">Cancel</button>
+        <button class="btn btn-primary" style="width:auto" onclick="savePlan()">
+          <span class="btn-text">Create Plan</span><span class="btn-loader"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking Modal -->
+  <div class="modal-overlay" id="modal-booking">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Book Training Session</h3>
+        <button class="modal-close" onclick="closeModal('modal-booking')">✕</button>
+      </div>
+      <div class="form-group"><label class="form-label">Select Mentor</label><select id="bk-mentor" class="form-control" onchange="loadBookingSlots()"><option value="">— Choose Mentor —</option></select></div>
+      <div class="form-group"><label class="form-label">Date</label><input type="date" id="bk-date" class="form-control" onchange="loadBookingSlots()"></div>
+      <div class="form-group" id="bk-slots-wrap" style="display:none">
+        <label class="form-label">Available Time Slots</label>
+        <div class="slot-grid" id="bk-slots"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Session Type</label>
+        <select id="bk-type" class="form-control">
+          <option value="personal">Personal Training</option>
+          <option value="group">Group Session</option>
+          <option value="cardio">Cardio Session</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-booking')">Cancel</button>
+        <button class="btn btn-primary" style="width:auto" onclick="confirmBooking()">
+          <span class="btn-text">Confirm Booking</span><span class="btn-loader"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress Update Modal (Mentor) -->
+  <div class="modal-overlay" id="modal-progress">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Update Member Progress</h3>
+        <button class="modal-close" onclick="closeModal('modal-progress')">✕</button>
+      </div>
+      <input type="hidden" id="prog-member-id">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Weight (kg)</label><input type="number" id="prog-weight" class="form-control" placeholder="72"></div>
+        <div class="form-group"><label class="form-label">Body Fat (%)</label><input type="number" id="prog-fat" class="form-control" placeholder="18"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Muscle Mass (kg)</label><input type="number" id="prog-muscle" class="form-control" placeholder="34"></div>
+        <div class="form-group"><label class="form-label">Sessions This Week</label><input type="number" id="prog-sessions" class="form-control" placeholder="4"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Workout Notes</label><textarea id="prog-notes" class="form-control" rows="3" placeholder="Good progress on squats. Increase bench press weight next week."></textarea></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-progress')">Cancel</button>
+        <button class="btn btn-primary" style="width:auto" onclick="saveProgress()">
+          <span class="btn-text">Save Progress</span><span class="btn-loader"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Modal -->
+  <div class="modal-overlay" id="modal-payment">
+    <div class="modal" style="max-width:480px">
+      <div class="modal-header">
+        <h3 class="modal-title">Complete Payment</h3>
+        <button class="modal-close" onclick="closeModal('modal-payment')">✕</button>
+      </div>
+      <div id="payment-summary" style="margin-bottom:20px;padding:16px;background:rgba(0,245,160,.06);border:1px solid rgba(0,245,160,.2);border-radius:12px;">
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:4px;">Plan Selected</div>
+        <div id="pay-plan-name" style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;"></div>
+        <div id="pay-plan-amount" class="payment-amount" style="font-size:36px;margin:8px 0;"></div>
+        <div id="pay-plan-duration" style="font-size:13px;color:var(--text-muted);"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Payment Method</label>
+        <div class="payment-methods">
+          <div class="payment-method selected" onclick="selectPayMethod(this,'upi')"><span class="pm-icon">📱</span>UPI</div>
+          <div class="payment-method" onclick="selectPayMethod(this,'card')"><span class="pm-icon">💳</span>Card</div>
+          <div class="payment-method" onclick="selectPayMethod(this,'netbanking')"><span class="pm-icon">🏦</span>Net Banking</div>
+        </div>
+      </div>
+      <div id="upi-fields">
+        <div class="form-group"><label class="form-label">UPI ID</label><input type="text" id="pay-upi" class="form-control" placeholder="rahul@upi"></div>
+      </div>
+      <div id="card-fields" class="hidden">
+        <div class="form-group"><label class="form-label">Card Number</label><input type="text" id="pay-card" class="form-control" placeholder="4242 4242 4242 4242" maxlength="19"></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Expiry</label><input type="text" id="pay-expiry" class="form-control" placeholder="MM/YY"></div>
+          <div class="form-group"><label class="form-label">CVV</label><input type="text" id="pay-cvv" class="form-control" placeholder="123" maxlength="3"></div>
+        </div>
+      </div>
+      <div id="nb-fields" class="hidden">
+        <div class="form-group"><label class="form-label">Select Bank</label>
+          <select id="pay-bank" class="form-control">
+            <option>SBI — State Bank of India</option>
+            <option>HDFC Bank</option><option>ICICI Bank</option><option>Axis Bank</option>
+            <option>Kotak Mahindra Bank</option><option>Punjab National Bank</option>
+          </select>
+        </div>
+      </div>
+      <input type="hidden" id="pay-plan-id">
+      <input type="hidden" id="pay-plan-price">
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-payment')">Cancel</button>
+        <button class="btn btn-primary" style="width:auto" onclick="processPayment()">
+          <span class="btn-text">Pay Now 🔒</span><span class="btn-loader"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="js/mentor.js"></script>
+  <script src="js/member.js"></script>
+  <script src="js/booking.js"></script>
+  <script src="js/payment.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

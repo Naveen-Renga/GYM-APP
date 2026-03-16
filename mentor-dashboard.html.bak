@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mentor Dashboard — IronForge</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="page-loader">
+    <div class="loader-logo">IRON<span>FORGE</span></div>
+    <div class="loader-bar"></div>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <div class="app-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">🏋️</div>
+        <div>
+          <div class="sidebar-brand">IRON<span>FORGE</span></div>
+          <div class="sidebar-subtitle">Mentor Portal</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <div class="nav-section-label">MY WORK</div>
+        <div class="nav-item active" id="nav-home" onclick="loadPage('home')"><span class="nav-icon">📊</span><span>Dashboard</span></div>
+        <div class="nav-item" id="nav-my-members" onclick="loadPage('my-members')"><span class="nav-icon">👥</span><span>My Members</span></div>
+        <div class="nav-item" id="nav-schedule" onclick="loadPage('schedule')"><span class="nav-icon">📅</span><span>Schedule</span></div>
+        <div class="nav-item" id="nav-progress" onclick="loadPage('progress')"><span class="nav-icon">📈</span><span>Progress</span></div>
+        <div class="nav-section-label">ACCOUNT</div>
+        <div class="nav-item" id="nav-profile" onclick="loadPage('profile')"><span class="nav-icon">👤</span><span>Profile</span></div>
+      </nav>
+
+      <div class="sidebar-user" id="sidebar-user">
+        <div class="sidebar-avatar" id="user-avatar-sidebar">M</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="user-name-sidebar">Loading...</div>
+          <div class="sidebar-user-role">MENTOR</div>
+        </div>
+        <span class="sidebar-logout" onclick="handleLogout()" title="Logout">⏻</span>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="topbar-menu-btn" onclick="toggleSidebar()">☰</button>
+          <div>
+            <div class="topbar-title" id="topbar-title">Dashboard</div>
+            <div class="topbar-breadcrumb" id="topbar-breadcrumb">IronForge › Dashboard</div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="topbar-notif" id="notif-btn" onclick="toggleNotif()">
+            🔔 <span class="notif-dot"></span>
+            <div class="notif-panel hidden" id="notif-panel">
+              <div style="padding:14px 16px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:13px;font-weight:700;">Notifications</div>
+              <div id="notif-list">
+                <div class="notif-item"><div class="notif-dot-i"></div><div class="notif-text"><strong>Welcome back!</strong><span>Check your schedule for today.</span></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="content-area" id="main-content">
+        <div class="empty-state"><div class="empty-icon" style="animation:spin 1s linear infinite">⚙️</div><h3>Loading...</h3></div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Progress Update Modal (Mentor) -->
+  <div class="modal-overlay" id="modal-progress">
+    <div class="modal">
+      <div class="modal-header"><h3 class="modal-title">Update Member Progress</h3><button class="modal-close" onclick="closeModal('modal-progress')">✕</button></div>
+      <input type="hidden" id="prog-member-id">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Weight (kg)</label><input type="number" id="prog-weight" class="form-control" placeholder="72"></div>
+        <div class="form-group"><label class="form-label">Body Fat (%)</label><input type="number" id="prog-fat" class="form-control" placeholder="18"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Workout Notes</label><textarea id="prog-notes" class="form-control" rows="3" placeholder="Good progress..."></textarea></div>
+      <div class="form-group"><label class="form-label">Diet Notes</label><textarea id="prog-diet" class="form-control" rows="3" placeholder="Increase protein intake..."></textarea></div>
+      <div class="form-group"><label class="form-label">Workout Plan</label><textarea id="prog-workout" class="form-control" rows="3" placeholder="Monday: Chest..."></textarea></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-progress')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveProgress()"><span class="btn-text">Save Progress</span></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/mentor.js"></script>
+</body>
+</html>

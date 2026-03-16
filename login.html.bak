@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — IronForge Gym</title>
+  <link rel="stylesheet" href="css/style.css"/>
+
+  <!-- Firebase SDKs (v9 compat mode) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+  <style>
+    body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background-color: var(--bg-dark); }
+    .auth-container { width: 100%; max-width: 440px; padding: 24px; position: relative; z-index: 2; }
+    
+    .auth-logo { text-align: center; margin-bottom: 32px; }
+    .auth-logo-text { font-family: 'Syncopate', sans-serif; font-size: 32px; font-weight: 700; }
+    .auth-logo-text span { color: var(--primary); }
+    .auth-logo-sub { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+
+    .auth-card {
+      background: var(--bg-card); backdrop-filter: blur(20px);
+      border: 1px solid var(--border); border-radius: 20px;
+      padding: 0; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+      overflow: hidden;
+    }
+
+    .auth-tabs { display: flex; border-bottom: 1px solid var(--border); }
+    .auth-tab {
+      flex: 1; padding: 16px; text-align: center; font-weight: 600;
+      color: var(--text-muted); cursor: pointer; transition: var(--transition);
+      background: rgba(0,0,0,0.2); border: none; font-size: 15px;
+    }
+    .auth-tab.active { background: transparent; color: #fff; border-bottom: 2px solid var(--primary); }
+    .auth-tab:hover:not(.active) { color: #fff; background: rgba(255,255,255,0.02); }
+
+    .auth-forms-wrap { padding: 32px; }
+    .auth-form { display: none; }
+    .auth-form.active { display: block; animation: fadeIn 0.3s ease; }
+    
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .auth-error { display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #F87171; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; }
+    .auth-success { display: none; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #34D399; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; }
+    .visible { display: block; }
+
+    .auth-footer { text-align: center; font-size: 13px; color: var(--text-muted); margin-top: 24px; }
+    
+    .setup-hint {
+      margin-top: 24px; padding: 16px; background: rgba(255, 215, 0, 0.05);
+      border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 12px;
+    }
+    .setup-hint-title { font-size: 11px; font-weight: 700; color: var(--gold); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+    .setup-hint-text { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.6; }
+    .setup-hint-text code { color: var(--primary); background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+  </style>
+</head>
+<body>
+
+  <div class="auth-container">
+    <!-- Logo -->
+    <div class="auth-logo">
+      <a href="index.html" style="text-decoration:none; color:inherit;">
+        <div class="auth-logo-text">IRON<span>FORGE</span></div>
+      </a>
+      <div class="auth-logo-sub">Gym Management System</div>
+    </div>
+
+    <!-- Auth Card -->
+    <div class="auth-card">
+      <!-- Tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchTab('login')">Sign In</button>
+        <button class="auth-tab" onclick="switchTab('signup')">Register</button>
+      </div>
+
+      <div class="auth-forms-wrap">
+        <!-- Login Form -->
+        <div class="auth-form active" id="login-form">
+          <div id="auth-error-login" class="auth-error"></div>
+          <div id="auth-success-login" class="auth-success"></div>
+
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" id="login-email" class="form-control" placeholder="your@email.com" autocomplete="email"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" id="login-password" class="form-control" placeholder="Enter your password" autocomplete="current-password"
+              onkeydown="if(event.key==='Enter')loginUser(document.getElementById('login-email').value,document.getElementById('login-password').value)"/>
+          </div>
+
+          <button class="btn btn-primary w-full mt-10" id="login-btn" data-orig="Sign In"
+            onclick="loginUser(document.getElementById('login-email').value, document.getElementById('login-password').value)">
+            Sign In
+          </button>
+
+          <div class="auth-footer">
+            Admin/Mentor accounts are created by the administrator.
+          </div>
+
+          <!-- Demo credentials hint -->
+          <div class="setup-hint">
+            <div class="setup-hint-title">💡 First Time Setup</div>
+            <div class="setup-hint-text">
+              Create your first Admin account by using the Firebase Console → Authentication → Add User, 
+              then add a Firestore document in <code>users/{uid}</code> with 
+              <code>role: "admin"</code>.
+              <br/><br/>
+              Or register as a Member via the Register tab.
+            </div>
+          </div>
+        </div>
+
+        <!-- Signup Form -->
+        <div class="auth-form" id="signup-form">
+          <div id="auth-error-signup" class="auth-error"></div>
+          <div id="auth-success-signup" class="auth-success"></div>
+
+          <div class="grid-2" style="gap:16px;">
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label">Full Name</label>
+              <input type="text" id="signup-name" class="form-control" placeholder="John Doe"/>
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label">Phone</label>
+              <input type="tel" id="signup-phone" class="form-control" placeholder="9876543210"/>
+            </div>
+          </div>
+          <div class="form-group mt-20">
+            <label class="form-label">Email Address</label>
+            <input type="email" id="signup-email" class="form-control" placeholder="your@email.com"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" id="signup-password" class="form-control" placeholder="Minimum 6 characters"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirm Password</label>
+            <input type="password" id="signup-confirm" class="form-control" placeholder="Confirm your password"/>
+          </div>
+
+          <button class="btn btn-primary w-full mt-10" id="signup-btn" data-orig="Create Account"
+            onclick="handleSignup()">
+            Create Account
+          </button>
+
+          <div class="auth-footer">
+            Members register here. Admin & Mentor accounts are created by administrators.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:24px;">
+      <a href="index.html" style="font-size:13px; color:var(--text-muted); text-decoration:none;">← Back to Home</a>
+    </div>
+  </div>
+
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    function switchTab(tab) {
+      document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById(tab + '-form').classList.add('active');
+
+      // Hide messages on switch
+      document.getElementById('auth-error-login').classList.remove('visible');
+      document.getElementById('auth-success-login').classList.remove('visible');
+      document.getElementById('auth-error-signup').classList.remove('visible');
+      document.getElementById('auth-success-signup').classList.remove('visible');
+    }
+
+    // Override the showAuthError from auth.js to handle tabs correctly
+    window.showAuthError = function(msg) {
+        const isLogin = document.getElementById('login-form').classList.contains('active');
+        const el = document.getElementById(isLogin ? 'auth-error-login' : 'auth-error-signup');
+        if (el) { el.textContent = msg; el.classList.add('visible'); }
+        const btn = document.getElementById(isLogin ? 'login-btn' : 'signup-btn');
+        if (btn) { btn.textContent = btn.dataset.orig; btn.disabled = false; }
+    }
+
+    function handleSignup() {
+      const name     = document.getElementById('signup-name').value.trim();
+      const phone    = document.getElementById('signup-phone').value.trim();
+      const email    = document.getElementById('signup-email').value.trim();
+      const password = document.getElementById('signup-password').value;
+      const confirm  = document.getElementById('signup-confirm').value;
+
+      document.getElementById('auth-error-signup').classList.remove('visible');
+
+      if (!name || !email || !password) {
+        showAuthError('Please fill in all required fields.');
+        return;
+      }
+      if (password !== confirm) {
+        showAuthError('Passwords do not match.');
+        return;
+      }
+      if (password.length < 6) {
+        showAuthError('Password must be at least 6 characters.');
+        return;
+      }
+      
+      const btn = document.getElementById('signup-btn');
+      btn.textContent = 'Creating...';
+      btn.disabled = true;
+
+      signupMember(name, email, password, phone);
+    }
+  </script>
+</body>
+</html>

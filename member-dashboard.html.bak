@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Member Dashboard — IronForge</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div id="page-loader">
+    <div class="loader-logo">IRON<span>FORGE</span></div>
+    <div class="loader-bar"></div>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <div class="app-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">💪</div>
+        <div>
+          <div class="sidebar-brand">IRON<span>FORGE</span></div>
+          <div class="sidebar-subtitle">Member Portal</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <div class="nav-section-label">MY GYM</div>
+        <div class="nav-item active" id="nav-home" onclick="loadPage('home')"><span class="nav-icon">📊</span><span>Dashboard</span></div>
+        <div class="nav-item" id="nav-my-plan" onclick="loadPage('my-plan')"><span class="nav-icon">📋</span><span>My Plan</span></div>
+        <div class="nav-item" id="nav-my-mentor" onclick="loadPage('my-mentor')"><span class="nav-icon">🏅</span><span>My Mentor</span></div>
+        <div class="nav-item" id="nav-book" onclick="loadPage('book')"><span class="nav-icon">📅</span><span>Book Session</span></div>
+        <div class="nav-item" id="nav-my-workout" onclick="loadPage('my-workout')"><span class="nav-icon">💪</span><span>Workout Plan</span></div>
+        <div class="nav-item" id="nav-my-payments" onclick="loadPage('my-payments')"><span class="nav-icon">💳</span><span>Payments</span></div>
+        <div class="nav-section-label">ACCOUNT</div>
+        <div class="nav-item" id="nav-profile" onclick="loadPage('profile')"><span class="nav-icon">👤</span><span>Profile</span></div>
+        <div class="nav-item" id="nav-progress" onclick="loadPage('progress')"><span class="nav-icon">📈</span><span>Progress</span></div>
+      </nav>
+
+      <div class="sidebar-user" id="sidebar-user">
+        <div class="sidebar-avatar" id="user-avatar-sidebar">U</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="user-name-sidebar">Loading...</div>
+          <div class="sidebar-user-role">MEMBER</div>
+        </div>
+        <span class="sidebar-logout" onclick="handleLogout()" title="Logout">⏻</span>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="topbar-menu-btn" onclick="toggleSidebar()">☰</button>
+          <div>
+            <div class="topbar-title" id="topbar-title">Dashboard</div>
+            <div class="topbar-breadcrumb" id="topbar-breadcrumb">IronForge › Dashboard</div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="topbar-notif" id="notif-btn" onclick="toggleNotif()">
+            🔔 <span class="notif-dot"></span>
+            <div class="notif-panel hidden" id="notif-panel">
+              <div style="padding:14px 16px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:13px;font-weight:700;">Notifications</div>
+              <div id="notif-list">
+                <div class="notif-item"><div class="notif-dot-i"></div><div class="notif-text"><strong>Welcome to IronForge!</strong><span>Get started with your fitness journey.</span></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="content-area" id="main-content">
+        <div class="empty-state"><div class="empty-icon" style="animation:spin 1s linear infinite">⚙️</div><h3>Loading...</h3></div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Booking Modal -->
+  <div class="modal-overlay" id="modal-booking">
+    <div class="modal">
+      <div class="modal-header"><h3 class="modal-title">Book Training Session</h3><button class="modal-close" onclick="closeModal('modal-booking')">✕</button></div>
+      <div class="form-group"><label class="form-label">Select Mentor</label><select id="bk-mentor" class="form-control" onchange="loadBookingSlots()"><option value="">— Choose Mentor —</option></select></div>
+      <div class="form-group"><label class="form-label">Date</label><input type="date" id="bk-date" class="form-control" onchange="loadBookingSlots()"></div>
+      <div class="form-group" id="bk-slots-wrap" style="display:none">
+        <label class="form-label">Available Time Slots</label>
+        <div class="slot-grid" id="bk-slots"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Session Type</label>
+        <select id="bk-type" class="form-control">
+          <option value="personal">Personal Training</option>
+          <option value="group">Group Session</option>
+          <option value="cardio">Cardio Session</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-booking')">Cancel</button>
+        <button class="btn btn-primary" onclick="confirmBooking()"><span class="btn-text">Confirm Booking</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Modal -->
+  <div class="modal-overlay" id="pay-modal">
+    <div class="modal" style="max-width:480px">
+      <div class="modal-header">
+        <h3 class="modal-title">Complete Payment</h3>
+        <button class="modal-close" onclick="closeModal('pay-modal')">✕</button>
+      </div>
+      <div id="payment-summary" style="margin-bottom:20px;padding:16px;background:rgba(0,245,160,.06);border:1px solid rgba(0,245,160,.2);border-radius:12px;">
+        <div id="pay-summary"></div>
+      </div>
+      <div class="payment-methods">
+        <div class="pm-label" style="font-weight:600;margin-bottom:8px">Select Payment Method</div>
+        <div class="pm-options" style="display:flex;gap:12px">
+            <label class="pm-option" style="cursor:pointer"><input type="radio" name="pm" value="UPI" checked onclick="toggleUPIField(true)"/> <span>📱 UPI</span></label>
+            <label class="pm-option" style="cursor:pointer"><input type="radio" name="pm" value="Card" onclick="toggleUPIField(false)"/> <span>💳 Card</span></label>
+            <label class="pm-option" style="cursor:pointer"><input type="radio" name="pm" value="NetBanking" onclick="toggleUPIField(false)"/> <span>🏦 Net Banking</span></label>
+        </div>
+      </div>
+      <div id="upi-field" class="form-group mt-10">
+        <label>UPI ID</label>
+        <input type="text" id="upi-id" class="form-control" placeholder="yourname@upi" />
+      </div>
+      <div id="pay-error" class="auth-error" style="color:var(--red);margin-top:10px;"></div>
+      <div class="modal-footer mt-10" style="flex-direction:column;gap:10px">
+        <button class="btn btn-primary w-full" id="confirm-pay-btn" onclick="processPayment()">Pay Now 🔒</button>
+        <p class="pay-note" style="font-size:12px;color:var(--text-muted);text-align:center">This is a simulated payment for demo purposes.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <!-- Member Logic -->
+  <script src="js/member.js"></script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: #070710;
+    color: #e2e8f0;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #0D0D1A; }
+  ::-webkit-scrollbar-thumb { background: #252540; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #00F5A0; }
+}
+
+@layer components {
+  /* Glassmorphism Card */
+  .glass-card {
+    @apply bg-dark-700/60 backdrop-blur-md border border-white/[0.08] rounded-2xl;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+
+  /* Neon Button */
+  .btn-neon {
+    @apply bg-neon-green text-dark-900 font-semibold px-6 py-2.5 rounded-xl
+           transition-all duration-200 hover:shadow-glow-green hover:scale-105
+           active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Ghost Button */
+  .btn-ghost {
+    @apply border border-white/10 text-slate-300 font-medium px-6 py-2.5 rounded-xl
+           transition-all duration-200 hover:border-white/20 hover:text-white
+           hover:bg-white/5 active:scale-95;
+  }
+
+  /* Red Danger Button */
+  .btn-danger {
+    @apply border border-red-500/30 text-red-400 font-medium px-4 py-2 rounded-lg text-sm
+           transition-all duration-200 hover:bg-red-500/10 hover:border-red-500/60;
+  }
+
+  /* Form Input */
+  .form-input {
+    @apply w-full bg-dark-600/80 border border-white/[0.08] rounded-xl px-4 py-3
+           text-slate-200 placeholder-slate-500 text-sm
+           focus:outline-none focus:border-neon-green/50 focus:bg-dark-600
+           transition-all duration-200;
+  }
+
+  /* Sidebar Nav Item */
+  .nav-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 text-sm font-medium
+           cursor-pointer transition-all duration-200
+           hover:text-white hover:bg-white/5;
+  }
+
+  .nav-item.active {
+    @apply text-neon-green bg-neon-green/10 border border-neon-green/20;
+  }
+
+  /* Status Badges */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
+  }
+
+  .badge-success { @apply badge bg-neon-green/10 text-neon-green border border-neon-green/20; }
+  .badge-warning { @apply badge bg-amber-500/10 text-amber-400 border border-amber-500/20; }
+  .badge-danger  { @apply badge bg-red-500/10 text-red-400 border border-red-500/20; }
+  .badge-blue    { @apply badge bg-blue-500/10 text-blue-400 border border-blue-500/20; }
+  .badge-purple  { @apply badge bg-purple-500/10 text-purple-400 border border-purple-500/20; }
+  .badge-gold    { @apply badge bg-amber-500/10 text-amber-400 border border-amber-500/20; }
+  .badge-gray    { @apply badge bg-slate-500/10 text-slate-400 border border-slate-500/20; }
+
+  /* Gradient Text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-neon-green to-neon-blue bg-clip-text text-transparent;
+  }
+
+  .gradient-text-purple {
+    @apply bg-gradient-to-r from-neon-purple to-neon-pink bg-clip-text text-transparent;
+  }
+
+  /* Stat Card Accent Borders */
+  .stat-green { border-left: 3px solid #00F5A0; }
+  .stat-purple { border-left: 3px solid #7C3AED; }
+  .stat-blue  { border-left: 3px solid #3B82F6; }
+  .stat-gold  { border-left: 3px solid #F59E0B; }
+  .stat-red   { border-left: 3px solid #EF4444; }
+
+  /* Data Table */
+  .data-table {
+    @apply w-full text-sm;
+  }
+  .data-table thead tr {
+    @apply border-b border-white/[0.06];
+  }
+  .data-table thead th {
+    @apply text-left text-slate-500 font-medium text-xs uppercase tracking-wider py-3 px-4;
+  }
+  .data-table tbody tr {
+    @apply border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors;
+  }
+  .data-table tbody td {
+    @apply py-3.5 px-4 text-slate-300;
+  }
+
+  /* Page Section */
+  .page-section {
+    @apply space-y-6;
+  }
+}
+
+/* 3D Background gradient */
+.bg-mesh {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(124,58,237,0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(0,245,160,0.1) 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 80%, rgba(59,130,246,0.08) 0%, transparent 50%),
+    #070710;
+}
+
+/* Toast custom styling */
+.react-hot-toast-container { font-family: 'Inter', sans-serif !important; }
