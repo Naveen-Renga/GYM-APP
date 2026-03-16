@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../firebase/config';
-import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, query, where, doc, getDoc, onSnapshot, orderBy } from 'firebase/firestore';
 import { saveMemberFeedback, getMemberFeedback } from '../../firebase/firestore';
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -31,44 +31,60 @@ export default function MemberProgress() {
 
   useEffect(() => {
     if (!user) return;
-    const load = async () => {
+
+    // Load static data
+    const loadStatic = async () => {
       try {
-        const [nDoc, bSnap, fDoc] = await Promise.all([
+        const [nDoc, fDoc] = await Promise.all([
           getDoc(doc(db, 'memberNotes', user.uid)),
-          getDocs(query(collection(db, 'bookings'), where('memberId', '==', user.uid), where('status', '==', 'confirmed'))),
           getMemberFeedback(user.uid)
         ]);
-
         if (nDoc.exists()) setNotes(nDoc.data());
         if (fDoc.exists()) setFeedback(fDoc.data().text || '');
-
-        const bookings = bSnap.docs.map(d => d.data());
-        setTotalSessions(bookings.length);
-        
-        // Group by month
-        const monthlyData = {};
-        for (let i = 4; i >= 0; i--) {
-          const d = new Date();
-          d.setMonth(d.getMonth() - i);
-          const key = d.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
-          monthlyData[key] = { month: key, sessions: 0 };
-        }
-
-        bookings.forEach(b => {
-          if (!b.date) return;
-          const dt = new Date(b.date);
-          const key = dt.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
-          if (monthlyData[key]) {
-             monthlyData[key].sessions++;
-          }
-        });
-
-        setChartData(Object.values(monthlyData));
-        
-      } catch (e) { console.error(e); }
-      finally { setLoading(false); }
+      } catch (e) { console.error("Error loading static data:", e); }
     };
-    load();
+    loadStatic();
+
+    // Real-time attendance listener
+    const q = query(
+      collection(db, 'attendance'),
+      where('memberId', '==', user.uid),
+      where('status', '==', 'present'),
+      orderBy('date', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(q, (snap) => {
+      const records = snap.docs.map(d => d.data());
+      setTotalSessions(records.length);
+
+      // Group by month
+      const monthlyData = {};
+      for (let i = 4; i >= 0; i--) {
+        const d = new Date();
+        d.setMonth(d.getMonth() - i);
+        const key = d.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
+        monthlyData[key] = { month: key, sessions: 0 };
+      }
+
+      records.forEach(r => {
+        if (!r.date) return;
+        // Handle both string dates and Firestore Timestamps
+        const dt = typeof r.date === 'string' ? new Date(r.date) : r.date.toDate();
+        const key = dt.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
+        if (monthlyData[key]) {
+          monthlyData[key].sessions++;
+        }
+      });
+
+      setChartData(Object.values(monthlyData));
+      setLoading(false);
+    }, (err) => {
+      console.error("Attendance listener error:", err);
+      toast.error("Failed to sync attendance data");
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, [user]);
 
   const handleSaveFeedback = async () => {
