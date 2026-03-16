@@ -49,12 +49,20 @@ export default function MemberProgress() {
     const q = query(
       collection(db, 'attendance'),
       where('memberId', '==', user.uid),
-      where('status', '==', 'present'),
-      orderBy('date', 'desc')
+      where('status', '==', 'present')
+      // Removed orderBy to avoid missing composite index error
     );
 
     const unsubscribe = onSnapshot(q, (snap) => {
-      const records = snap.docs.map(d => d.data());
+      let records = snap.docs.map(d => d.data());
+      
+      // Sort in-memory: Latest first
+      records.sort((a, b) => {
+        const dateA = a.date?.toDate ? a.date.toDate() : new Date(a.date || 0);
+        const dateB = b.date?.toDate ? b.date.toDate() : new Date(b.date || 0);
+        return dateB - dateA;
+      });
+
       setTotalSessions(records.length);
 
       // Group by month
